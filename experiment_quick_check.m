@@ -1,0 +1,479 @@
+%%
+scenario = 'radar0.5m_source0.5m';
+objects = ["spindrift", "traderjoebag", "layschip"];
+for kk=2
+    oldfolder = sprintf('experiment_data2/%s/%s/profile3/wav_noeq',objects(kk),scenario);
+    newfolder = sprintf('B:/experiment_data2/%s/%s/profile3/wav_noeq',objects(kk),scenario);
+     copyfile(sprintf('%s/*', oldfolder), newfolder);
+     
+     oldfolder = sprintf('experiment_data2/%s/%s/profile3/wav_eq',objects(kk),scenario);
+    newfolder = sprintf('B:/experiment_data2/%s/%s/profile3/wav_eq',objects(kk),scenario);
+     copyfile(sprintf('%s/*', oldfolder), newfolder);
+     
+     oldfolder = sprintf('experiment_data2/%s/%s/profile3/radarcube',objects(kk),scenario);
+    newfolder = sprintf('B:/experiment_data2/%s/%s/profile3/radarcube',objects(kk),scenario);
+     copyfile(sprintf('%s/*', oldfolder), newfolder);
+    %     oldname = sprintf('%s/%d_%s_profile3_voice%d_%d',oldfolder, ii,scenario,ii,jj);
+%     newname = sprintf('%s/%d_%d',newfolder,ii,jj);
+    %         newname = sprintf('%s/%d_radar0.5m_source0.5m_profile3_voice%d_%d',folder,ii,ii,jj);
+%     if ~exist(newfolder)
+%         mkdir(newfolder);
+%     end
+    %             movefile(sprintf('%s.mat', oldname), sprintf('%s.mat', newname));
+    %             movefile(sprintf('%s.fig', oldname), sprintf('%s.fig', newname));
+%                 copyfile(sprintf('%s.mat', oldname), newfolder);
+%                 copyfile(sprintf('%s.fig', oldname), newfolder);
+%     movefile(sprintf('%s.wav', oldname), sprintf('%s.wav', newname));
+end
+fprintf('Done\n');
+%%
+addpath('./snreval-master');
+% Fs = 8000;
+% chirpscanlen = 6; % sec
+% freqstart = 10;
+% freqend = 4000;
+% chirpscanslope = (freqend-freqstart)/chirpscanlen;
+% t = [0:1/Fs:chirpscanlen-1];
+% y = chirp(t, freqstart, chirpscanlen, freqend);
+% Fs = 16000; y = sin(2*pi*400*[0:1/Fs:10]);   sound(y, Fs); clear sound
+
+
+% [y, Fs] = audioread('audios/adele/someone_like_you.mp3'); y = y(fix(74*Fs):fix(82*Fs));
+% [y, Fs] = audioread('audios/coldplay_clocks.mp3'); y = y(fix(10*Fs):fix(20*Fs));
+% [y, Fs] = audioread('audios/beatles/let_it_be.mp3'); y = y(fix(12*Fs):fix(20*Fs));
+% [y, Fs] = audioread('audios/when_i_was_your_man.mp3'); y = y(fix(50*Fs):fix(59*Fs));
+% [y, Fs] = audioread('audios/1khz_calibration_tone.wav'); 
+
+
+%%% measure db level and save audio
+% [y, Fs] = audioread('audios/me/sa2.wav');  % sound(y, Fs); 
+% [y, Fs] = audioread('audios/mabw0/SA2.WAV.wav'); 
+% % [y, Fs] = audioread('audios/adele/someone_like_you.mp3'); y = y(fix(14*Fs):fix(22*Fs));
+% adjusted_y = 1*y./max(abs(y)); % 0.35 for 80db, 0.14 for 70 dB, 0.033 for 60 dB
+% sound(adjusted_y, Fs);
+% y = adjusted_y;
+% audiowrite('audios/mabw0/sa2_90db.wav', adjusted_y, Fs);
+% length(y)/Fs
+% wl = fix(0.1*Fs); nov = fix(wl*0.8);  nff = max(4096,2^nextpow2(wl));
+% figure; spectrogram(y,hamming(wl),nov,nff, Fs, 'yaxis','MinThreshold',-100); ylim([0 2]);
+% [y, Fs] = audioread('audios/mccs0/sa1_70db.wav'); sound(y,Fs);
+% clear sound 
+
+% RSTD_Interface_Example
+clear all; 
+close all;
+[yclean, fs_clean] = audioread('audios/fadg0/sa2_80db.wav');
+scripts = ["C:\\ti\\mmwave_studio_02_01_01_00\\mmWaveStudio\\Scripts\\Myscript\\mychirp3.lua",...
+    "C:\\ti\\mmwave_studio_02_01_01_00\\mmWaveStudio\\Scripts\\Myscript\\mycapture.lua"];
+for ii=1:length(scripts)
+    Lua_String = sprintf('dofile("%s")', scripts(ii));
+    ErrStatus =RtttNetClientAPI.RtttNetClient.SendCommand(Lua_String);
+    if (ErrStatus ~= 30000)
+        error('mmWaveStudio Connection Failed');
+    end
+end
+% pause(0.5);
+sound(yclean, fs_clean);
+
+for ii=1:100
+    disp(sprintf("## %d ##", ii));
+%     sound(y./max(y), Fs);
+    !powershell Get-Content "C:\\ti\\mmwave_studio_02_01_01_00\\mmWaveStudio\\PostProc\\CLI_LogFile.txt" -Tail 5
+    pause(1);
+end
+%%
+tic
+clear all; 
+close all;
+save_radarcube = 1;
+save_audio = 1;
+loadfromfile = 0;
+object = 'traderjoebag';
+scenario = 'radar1.5m_source0.5m';
+foldername = sprintf('experiment_data2/%s/%s/profile3/radarcube', object, scenario);
+% filename = "adele_someone_like_you_verse_60db";
+% filename = "beatles_let_it_be_60db";
+% filename = "fadg0_sa1_80db_demo";
+% filename = "me_sa2_80db";
+filename = "fadg0_sa2_80db";
+% filename = "mccs0_sa2_80db";
+% filename = "mabw0_sa2_90db";
+% filename = "raw_typing_samedesk";
+wavpath_noeq =  sprintf('experiment_data2/%s/%s/profile3/wav_noeq', object, scenario);
+wavpath_eq =  sprintf('experiment_data2/%s/%s/profile3/wav_eq', object, scenario);
+[yclean, fs_clean] = audioread('audios/fadg0/sa2_80db.wav');
+params = read_from_json('profile3.mmwave.json');
+numFrames = 5;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+params.numFrames = numFrames;
+if loadfromfile
+    load(sprintf('%s/%s.mat', foldername, filename));
+else
+    numBinFiles = ceil((4*params.numSamplePerChirp*4)*params.numChirps*numFrames/1024^3);
+    adc_data =  read_from_binfile(numBinFiles, numFrames, params.numChirps, params.numSamplePerChirp);
+    % adc_data (chirpsamples, chirps, frames)
+    datacube.adcdata = adc_data;
+    datacube.params = params;
+%      figure; plot(real(adc_data(:,1,1))); hold on; plot(imag(adc_data(:,1,1)));
+end
+
+% range fft
+[fftout, I] = rangeFFT(datacube.adcdata(:,1,1), datacube.params);
+
+% I=154; %  614, 637
+% extract phases across chirps
+rangecube = fft(datacube.adcdata, datacube.params.opRangeFFTSize, 1);
+y = angle(reshape(rangecube(I,:,:), [], 1)); % TODO: piecewise phase correction
+% in case of phase wrapping
+y = mod(y, 2*pi);
+y2 = zeros(size(y));
+segment_size = 1000;
+% phase correction
+for ii=1:datacube.params.numFrames
+    for jj=1:segment_size:datacube.params.numChirps
+        start_idx = (ii-1)*datacube.params.numChirps + jj;
+        end_idx = min(start_idx+segment_size-1, ii*datacube.params.numChirps); % don't cross chirp border
+        t = [1:end_idx-start_idx+1].';
+        [p, s, mu] = polyfit(t, y(start_idx:end_idx), 9);
+        trend= polyval(p, t, [], mu);
+        y2(start_idx:end_idx) = y(start_idx:end_idx) - trend;
+    end
+end
+% figure; plot(y);  figure; plot(y2);   sound(0.01*y2/max(y2), 14925)
+% figure; plot(datacube.params.chirpCycleTime*[1:length(y)],rad2deg(y)); xlabel('Second'); ylabel('Phase (degree)');
+% y2 =y2(fix(0.3*fs):end);
+
+% spectrogram
+fs = 1/datacube.params.chirpCycleTime;
+wl = fix(0.1*fs);
+nsc = wl; %params.numChirps; %floor(Nx/16);
+nov = fix(wl*0.8);
+nff = max(4096,2^nextpow2(nsc));
+
+% y2 = y2(fix(0.7*fs):end);
+% y2 = y2(1:fix(4.2*fs));
+y4 = noiseReduction_YW(y2, fs);
+% y4 = wiener_as(y2,fs);
+% y4 = noiseReduction_YW(y4, fs);
+figure(100); 
+subplot(2,1,1);spectrogram(y2,hamming(nsc),nov,nff, fs, 'yaxis','MinThreshold',-150);ylim([0 2]);
+subplot(2,1,2);spectrogram(y4,hamming(nsc),nov,nff, fs, 'yaxis','MinThreshold',-150);ylim([0 2]);
+% figure; plot(y4); hold on; plot([1 length(y4)], 2*max(y4(1:6000))*ones(1,2));
+% sound(0.01*y2/max(abs(y2)), fs)
+bpFilt = designfilt('bandpassiir','FilterOrder',20, ...
+         'HalfPowerFrequency1',100,'HalfPowerFrequency2',1000, 'DesignMethod','butter', ...
+         'SampleRate',fs);
+y4 = filter(bpFilt, y4);
+% y4 = y4(fix(0.7*fs):end);
+bpFilt1 = designfilt('bandpassiir','FilterOrder',20, ...
+                'HalfPowerFrequency1',100,'HalfPowerFrequency2',1000, 'DesignMethod','butter', ...
+                'SampleRate',fs_clean);
+yclean = filter(bpFilt1, yclean);
+[llr, wss, stoi_val, nist_snr,segsnr]=get_measures(yclean, fs_clean, y4, fs, 1);
+% figure; plot(y4)
+% sound(0.05*y3/max(abs(y3)), fs)
+% sound(0.05*y4/max(abs(y4)), fs)
+% % figure; plot(y4/max(abs(y4)))
+% clear sound
+
+if save_radarcube
+    if ~exist(foldername, 'dir')
+        mkdir(foldername);
+    end
+    save(sprintf('%s/%s.mat', foldername, filename), 'datacube', '-v7.3');
+    savefig(gcf, sprintf('%s/%s.fig', foldername, filename));
+end
+if save_audio
+    mkdir(wavpath_noeq);
+    mkdir(wavpath_eq);
+    audiowrite(sprintf('%s/%s.wav',wavpath_noeq, filename), y2, floor(fs));
+    audiowrite(sprintf('%s/%s.wav',wavpath_eq, filename), y4, floor(fs));
+end
+%%
+%%%% cut out each utterance
+clear startidx endidx
+yyy = fft(reshape(y4(1:end-mod(length(y4),nsc)), nsc, []),nff);
+zzz = max(abs(yyy), [],1); % figure; plot(zzz); hold on; plot([1 length(zzz)], 2*max(zzz(1:3))*ones(1,2));
+target_cliplen = 1.3; % sec
+minpeakdistance = 7;
+pos_minpeakheight = 0.3*max(zzz);
+neg_minpeakheight = -0.01; 
+n=5;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+for ii=1:4 % try lowering minpeakheight 4 times 
+    [pospks, poslocs] = findpeaks(zzz, 'MinPeakDistance',minpeakdistance, 'MinPeakHeight',pos_minpeakheight);
+    if length(poslocs)>=5
+        break
+    else
+        pos_minpeakheight = pos_minpeakheight/2;
+    end
+end
+%  figure; findpeaks(zzz, 'MinPeakDistance',minpeakdistance, 'MinPeakHeight',pos_minpeakheight)
+% [negpks, neglocs] = findpeaks(-zzz, 'MinPeakDistance',minpeakdistance, 'MinPeakHeight',neg_minpeakheight);
+% figure; plot(zzz); hold on; text(locs+.02,pks,num2str((1:numel(pks))'));
+if length(poslocs)==5
+    poslocs(6) = length(zzz);
+end
+for ii=1:n
+    z = zzz(poslocs(ii):poslocs(ii+1));
+    th = 0.1*max(z);
+    for jj=1:4 % try increasing threshold 4 times
+        a = find(z < th, 1);
+        b = find(z < th, 1, 'last');
+        if ~isempty(a) && ~isempty(b)
+            break;
+        else
+            th = th*2;
+        end
+    end
+    c = floor((a+b)/2);
+    endidx(ii) = poslocs(ii) + (c-1);
+    if ii==1
+        startidx(ii) = 1;
+    else
+        startidx(ii) = endidx(ii-1) -2 ;
+    end
+end
+% endidx = [ floor( (locs(1:end-1) + locs(2:end))/2)  min(locs(end)+15, length(zzz))] -0 ;
+% [c,minidx] = min(zzz(locs(1)-10:locs(1)));
+% startidx = [locs(1)-10+(minidx-1) endidx(1:end-1)+1];
+
+for ii=1:n
+%     figure(1); %plot(abs(zzz(startidx(1):endidx(1)))); 
+%     subplot(2,1,1); spectrogram(y4((startidx(ii)-1)*nsc+1:endidx(ii)*nsc),hamming(nsc),nov,nff, fs, 'yaxis'); ylim([0 2]); 
+    newzzz = zzz(startidx(ii):endidx(ii));
+%     figure; plot(newzzz);
+    a = find(newzzz > 0.1*max(newzzz), 1);
+    b = find(newzzz > 0.1*max(newzzz), 1, 'last');
+    target_len = fix(target_cliplen/(wl/fs)); 
+    excess_left = a -1;
+    excess_right  = length(newzzz) - b;
+    remove_cnt = length(newzzz) - target_len;
+    while remove_cnt > 0
+        if excess_left>excess_right
+            startidx(ii) = startidx(ii) +1;
+            excess_left = excess_left -1;
+        else
+            endidx(ii) = endidx(ii) -1;
+            excess_right = excess_right -1;
+        end
+        remove_cnt = remove_cnt - 1;
+    end
+%     subplot(2,1,2); spectrogram(y4((startidx(ii)-1)*nsc+1:endidx(ii)*nsc),hamming(nsc),nov,nff, fs, 'yaxis'); ylim([0 2]); 
+end
+% bbb=[4];
+% startidx(bbb) = startidx(bbb)+2;
+% endidx(bbb) = endidx(bbb)+2;
+figure(101); subplot(3, length(endidx), 2*length(endidx)+[1:length(endidx)]); plot(zzz); hold on ;
+for ii=1:min(length(endidx),5)
+    figure(101); subplot(3, length(endidx), 2*length(endidx)+[1:length(endidx)]); 
+    plot([endidx(ii) endidx(ii)], [min(zzz) max(zzz)] ); hold on;
+    figure(101); subplot(3,length(endidx),ii);
+    phases = y2((startidx(ii)-1)*nsc+1:endidx(ii)*nsc);
+    spectrogram(phases,hamming(nsc),nov,nff, fs, 'yaxis'); ylim([0 2]); 
+    figure(101); subplot(3,length(endidx),length(endidx)+ii);
+    phases2 = y4((startidx(ii)-1)*nsc+1:endidx(ii)*nsc);
+    spectrogram(phases2,hamming(nsc),nov,nff, fs, 'yaxis'); ylim([0 2]); 
+    if save_audio
+        if ~exist(wavpath_noeq, 'dir')
+        mkdir(wavpath_noeq);
+        end
+        if ~exist(wavpath_eq, 'dir')
+            mkdir(wavpath_eq);
+        end
+        audiowrite(sprintf('%s/%s%d.wav',wavpath_noeq, filename(1:end-1), ii+offset), phases, floor(fs));
+        audiowrite(sprintf('%s/%s%d.wav',wavpath_eq, filename(1:end-1), ii+offset), phases2, floor(fs));
+    end
+end
+toc
+
+for ii=1:n
+    [yy, samprate] = audioread(sprintf('%s/%s%d.wav',wavpath_eq, filename(1:end-1), ii+offset));
+     bpFilt = designfilt('bandpassiir','FilterOrder',10, ...
+         'HalfPowerFrequency1',70,'HalfPowerFrequency2',1000, 'DesignMethod','butter', ...
+         'SampleRate',samprate);
+    yy = filter(bpFilt, yy);
+    sound(yy./max(abs(yy)), samprate);
+    fprintf("%.2f\n",get_psnr(yy,fs));
+    pause(1.0);
+end
+
+% sound(y2./max(y2), fs); clear sound 
+% sound(y4./max(y4), fs); clear sound 
+% sound(y5./max(y5), fs); clear sound 
+%% from scan chirp calculate eq values for each subband
+load('B:/experiment_data2/layschip/radar0.5m_source1.0m/profile3/radarcube/chirpscan.mat');
+[y, fs]= audioread('B:/experiment_data2/layschip/radar0.5m_source1.0m/profile3/wav_eq/chirpscan.wav');
+wl = fix(0.01*fs); 
+nov = fix(wl/2);
+fftsize = 4096;
+fprintf('chirp scan freq changes %.1f Hz within each segment\n', chirpscanslope*wl/fs);
+y2 = fft(buffer(y,wl, 0), fftsize, 1);
+[M, I] = max(y2(1:fftsize/2, :), [], 1);
+figure; plot((wl-nov)/fs*[0:length(I)-1] , (I-1)*fs/fftsize);
+xlabel('Time(s)'); ylabel('frequency (Hz)');
+
+test_y = y2;
+subband_gain = zeros(60, 1); 
+for ii=1:60
+    b = 25;
+    bpFilt = designfilt('bandpassiir','FilterOrder',6, ...
+         'HalfPowerFrequency1',100+(ii-1)*b,'HalfPowerFrequency2',100+ii*b, 'DesignMethod','butter', ...
+         'SampleRate',1/datacube.params.chirpCycleTime);
+    test_y = filter(bpFilt, y2);
+    y3 = fft(reshape(test_y(1:length(test_y)- mod(length(test_y), segment_size)), segment_size, []), fftsize, 1);
+    % figure; imagesc(abs(y3(1:fftsize/2, :)));
+    [M, I] = max(abs(y3(1:fftsize/2, :)), [], 1);
+    subband_gain(ii) = max(M);
+%     figure; subplot(2,1,1); plot(db(M)); xlabel('time (s)'); 
+%     subplot(2,1,2); plot( (I-1)/datacube.params.chirpCycleTime/fftsize/1e3 ); ylabel('kHz');
+%     figure; spectrogram(test_y,hamming(nsc),nov,nff, fs, 'yaxis','MinThreshold',-150); ylim([0 2]);
+end
+eqvalues = 1./(subband_gain./max(subband_gain));
+figure; plot(subband_gain); hold on; plot(subband_gain.*eqvalues);
+
+% test eq performance
+y4 = zeros(size(y2));
+for ii=1:60
+    b = 25; 
+    bpFilt = designfilt('bandpassiir','FilterOrder',10, ...
+         'HalfPowerFrequency1',100+(ii-1)*b,'HalfPowerFrequency2',100+ii*b, 'DesignMethod','butter', ...
+         'SampleRate',1/datacube.params.chirpCycleTime);
+%     fvtool(bpFilt)
+    tmp = filter(bpFilt, y2);
+    noisesample = tmp(1:6000);%y2(1: (startidx(1)-1)*nsc );
+    noiselevel = 2*max(abs(noisesample));
+    tmp2 = (abs(tmp)>(noiselevel)).*tmp.*eqvalues(ii); % this step introduces odd harmonics
+    tmp2 = filter(bpFilt, tmp2); % filter out harmonics
+    y4 = y4 + tmp + tmp2;
+    figure(105); subplot(9,7, ii); plot(abs(tmp)); hold on; plot([1 length(tmp)], noiselevel* ones(1, 2));
+end
+
+figure(222); %nsc = 512; nov = floor(nsc/2);
+subplot(2,1,1); spectrogram(y2,hamming(nsc),nov,nff, fs, 'yaxis','MinThreshold',-150);  %ylim([0 2]); %xlim([0.6 1.5]);
+subplot(2,1,2); spectrogram(y4,hamming(nsc),nov,nff, fs, 'yaxis','MinThreshold',-150);  %ylim([0 2]); %xlim([0.6 1.5]);
+% sound(y2./max(y2), 1/datacube.params.chirpCycleTime);
+% sound(y4./max(y4), 1/datacube.params.chirpCycleTime);
+
+% save(sprintf('%s/radar0.5m_source0.5m_profile3_eqvalues.mat', foldername), 'eqvalues');
+%% equalization
+% test eq performance
+load(sprintf('%s/radar0.5m_source0.5m_profile3_eqvalues.mat', foldername));
+y4 = zeros(size(y2));
+for ii=1:200
+    b = 5; 
+    bpFilt = designfilt('bandpassiir','FilterOrder',10, ...
+         'HalfPowerFrequency1',100+(ii-1)*b,'HalfPowerFrequency2',100+ii*b, 'DesignMethod','butter', ...
+         'SampleRate',1/datacube.params.chirpCycleTime);
+%     fvtool(bpFilt)
+    tmp = filter(bpFilt, y2);
+    noisesample = tmp(1: (startidx(1)-1)*nsc ); % tmp(1:6000);
+    noiselevel = 1.5*max(abs(noisesample));
+    tmp2 = (abs(tmp)>(noiselevel)).*tmp.*10; %eqvalues(ii); % this step introduces odd harmonics
+    tmp2 = filter(bpFilt, tmp2); % filter out harmonics
+    y4 = y4 + tmp + tmp2;
+%     figure(105); subplot(9,7, ii); plot(abs(tmp)); hold on; plot([1 length(tmp)], noiselevel* ones(1, 2));
+end
+
+figure(222); 
+subplot(2,1,1); spectrogram(y2,hamming(nsc),nov,nff, fs, 'yaxis','MinThreshold',-150);  ylim([0 2]); %xlim([0.6 1.5]);
+subplot(2,1,2); spectrogram(y4,hamming(nsc),nov,nff, fs, 'yaxis','MinThreshold',-150);  ylim([0 2]); %xlim([0.6 1.5]);
+% sound(y2./max(y2), 1/datacube.params.chirpCycleTime);
+% sound(y4./max(y4), 1/datacube.params.chirpCycleTime);
+% clear sound 
+%%
+% peak=I;
+% phases = zeros(params.numFrames, params.numChirps, 3);
+% vibration_spectrum = zeros(params.numFrames, params.opDopplerFFTSize, 3);
+% corrected_phases = zeros(params.numFrames, params.numChirps, 3);
+% for kk=1:3
+%     for ii=1:params.numFrames
+%         for jj=1:params.numChirps
+%             adc_data = double(squeeze(datacube.adcdata{ii}(jj,kk,:))).';
+%             rangefft = fft(adc_data, params.opRangeFFTSize);
+%     %         phases((ii-1)*params.numChirps+jj) = angle(rangefft(peak));
+%             phases(ii, jj, kk) = angle(rangefft(peak));
+%         end
+%     end
+%     polyFitOrder = 9;
+%     [vibration_spectrum(:,:,kk), corrected_phases(:,:,kk), I] = phases_to_spectrum(phases(:,:,kk), params, polyFitOrder, 0);
+% end
+%% old eq
+start_time = 0.5;
+end_time = 1.5;
+start_chirp = floor(start_time / params.chirpCycleTime);
+end_chirp = ceil(end_time / params.chirpCycleTime);
+n = end_chirp - start_chirp + 1;
+
+y3 = zeros(n, 1);
+for ii=1:floor(n/640)
+    idx = start_chirp-1 + [1:640] + (ii-1)*640; % ~43 ms segment size 
+    y3_idx = [1:640] + (ii-1)*640;
+    y2_seg =y2(idx); 
+    Y2_seg = fft(y2_seg, params.opDopplerFFTSize);
+    noise = abs(Y2_seg([floor(0.8*params.opDopplerFFTSize/2):params.opDopplerFFTSize/2]));
+    noisemean = mean(noise);  noisestd = std(noise);
+    freq_step = 1/params.chirpCycleTime/params.opDopplerFFTSize;
+    lo = 1 + floor(70 / freq_step);
+    hi = 1 + ceil(160 / freq_step);
+    [M, I] = max(abs(Y2_seg(lo:hi)));
+    fundamental = (lo + (I-1) -1) * freq_step;
+
+    for jj = 1:9
+        lo = floor( (jj*fundamental - 50 ) /freq_step);
+        hi = ceil( (jj*fundamental + 50 )  /freq_step);
+        [M, I] = max(abs(Y2_seg(lo:hi))); 
+        threshold = noisemean + 2*noisestd;
+        if M < threshold
+            continue
+        end
+        harmonic =  (lo + (I-1) -1) * freq_step;
+        % bandpass filter out the harmonic
+        order = 1200;
+        bpFilt2 = designfilt('bandpassfir','FilterOrder',order, 'CutoffFrequency1',harmonic-2,...
+            'CutoffFrequency2',harmonic+2, 'SampleRate',1/params.chirpCycleTime);
+        out = conv(bpFilt2.Coefficients.', y2_seg); out = out(1+order/2:end-order/2);
+        y3(y3_idx) = y3(y3_idx) + out;
+        
+        figure(ii);
+        subplot(3,3,jj); plot( ([lo:hi]-1)*freq_step, abs(Y2_seg(lo:hi))); hold on; 
+        plot(([lo hi]-1)*freq_step, abs(threshold*ones(1,2)));
+    end
+    
+%         order = 1200;
+%         bpFilt2 = designfilt('bandpassfir','FilterOrder',order, 'CutoffFrequency1',100,...
+%             'CutoffFrequency2',1500, 'SampleRate',1/params.chirpCycleTime);
+%         out = conv(bpFilt2.Coefficients.', y2_seg); out = out(1+order/2:end-order/2);
+%         y3(y3_idx) = y3(y3_idx) + out;
+
+end
+
+% sound(0.01*y2(start_chirp:end_chirp)/max(y2(start_chirp:end_chirp)), 14925);
+% sound(0.01*y3/max(y3), 14925);
+
+% check out spectrogram
+Nx = length(y3);
+nsc = 1024; %params.numChirps; %floor(Nx/16);
+nov = floor(nsc/2);
+nff = max(8192,2^nextpow2(nsc));
+fs = 1/params.chirpCycleTime;
+figure(300); subplot(2,1,1); spectrogram(y2(start_chirp:end_chirp),hamming(nsc),nov,nff, fs, 'yaxis','MinThreshold',-100); 
+ylim([0 1.5]);
+subplot(2,1,2); spectrogram(y3,hamming(nsc),nov,nff, fs, 'yaxis','MinThreshold',-100);  ylim([0 1.5]);
+
+
+% figure; plot(14925/8192*[0:8191], abs(Y2)); hold on ; plot([1 14920], abs(estnoise*ones(1,2)));
+%%
+mPEQ = multibandParametricEQ( ...
+    'NumEQBands',3, ...
+    'Frequencies',[100,200,370], ...
+    'QualityFactors',[500 500 500], ...
+    'PeakGains',[8,10,7], ...
+    'HasHighpassFilter',true, ...
+    'HasLowpassFilter',true, ...
+    'LowpassCutoff',1500, ...
+    'SampleRate',1/params.chirpCycleTime);
+visualize(mPEQ);
+y4 = mPEQ(y2(start_chirp:end_chirp));
+spectrogram(y4,hamming(nsc),nov,nff, fs, 'yaxis','MinThreshold',-100); 
+ylim([0 1.5]);

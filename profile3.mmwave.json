@@ -1,0 +1,241 @@
+{
+  "configGenerator": {
+    "createdBy": "mmWaveStudio",
+    "createdOn": "2021-04-01T19:39:11.1244192-04:00",
+    "isConfigIntermediate": 1
+  },
+  "currentVersion": {
+    "jsonCfgVersion": {
+      "major": 0,
+      "minor": 4,
+      "patch": 0
+    },
+    "DFPVersion": {
+      "major": 1,
+      "minor": 2,
+      "patch": 0
+    },
+    "SDKVersion": {
+      "major": 3,
+      "minor": 0,
+      "patch": 0
+    },
+    "mmwavelinkVersion": {
+      "major": 1,
+      "minor": 2,
+      "patch": 0
+    }
+  },
+  "lastBackwardCompatibleVersion": {
+    "DFPVersion": {
+      "major": 1,
+      "minor": 1,
+      "patch": 0
+    },
+    "SDKVersion": {
+      "major": 2,
+      "minor": 0,
+      "patch": 0
+    },
+    "mmwavelinkVersion": {
+      "major": 1,
+      "minor": 1,
+      "patch": 0
+    }
+  },
+  "regulatoryRestrictions": {
+    "frequencyRangeBegin_GHz": 77,
+    "frequencyRangeEnd_GHz": 81,
+    "maxBandwidthAllowed_MHz": 4000,
+    "maxTransmitPowerAllowed_dBm": 12
+  },
+  "systemConfig": {
+    "summary": "This is a comments field not passed to device",
+    "sceneParameters": {
+      "ambientTemperature_degC": 20,
+      "maxDetectableRange_m": 10,
+      "rangeResolution_cm": 5,
+      "maxVelocity_kmph": 26,
+      "velocityResolution_kmph": 2,
+      "measurementRate": 10,
+      "typicalDetectedObjectRCS": 1
+    }
+  },
+  "mmWaveDevices": [
+    {
+      "mmWaveDeviceId": 0,
+      "rfConfig": {
+        "waveformType": "legacyFrameChirp",
+        "MIMOScheme": "TDM",
+        "rlCalibrationDataFile": "",
+        "rlChanCfg_t": {
+          "rxChannelEn": "0xF",
+          "txChannelEn": "0x3",
+          "cascading": 0,
+          "cascadingPinoutCfg": "0x0"
+        },
+        "rlAdcOutCfg_t": {
+          "fmt": {
+            "b2AdcBits": 2,
+            "b8FullScaleReducFctr": 0,
+            "b2AdcOutFmt": 1
+          }
+        },
+        "rlLowPowerModeCfg_t": {
+          "lpAdcMode": 0
+        },
+        "rlProfiles": [
+          {
+            "rlProfileCfg_t": {
+              "profileId": 0,
+              "pfVcoSelect": "0x0",
+              "pfCalLutUpdate": "0x0",
+              "startFreqConst_GHz": 77.0,
+              "idleTimeConst_usec": 3.5,
+              "adcStartTimeConst_usec": 5.119999885559082,
+              "rampEndTime_usec": 19.229999542236328,
+              "txOutPowerBackoffCode": "0x0",
+              "txPhaseShifter": "0x0",
+              "freqSlopeConst_MHz_usec": 64.985000610351562,
+              "txStartTime_usec": 0.0,
+              "numAdcSamples": 256,
+              "digOutSampleRate": 18500,
+              "hpfCornerFreq1": 0,
+              "hpfCornerFreq2": 0,
+              "rxGain_dB": "0x1E"
+            }
+          },
+          {
+            "rlProfileCfg_t": {
+              "profileId": 1,
+              "pfVcoSelect": "0x0",
+              "pfCalLutUpdate": "0x0",
+              "startFreqConst_GHz": 77.0,
+              "idleTimeConst_usec": 7.0,
+              "adcStartTimeConst_usec": 5.0100002288818359,
+              "rampEndTime_usec": 261.66000366210938,
+              "txOutPowerBackoffCode": "0x0",
+              "txPhaseShifter": "0x0",
+              "freqSlopeConst_MHz_usec": 15.015000343322754,
+              "txStartTime_usec": 0.0,
+              "numAdcSamples": 1024,
+              "digOutSampleRate": 4200,
+              "hpfCornerFreq1": 0,
+              "hpfCornerFreq2": 0,
+              "rxGain_dB": "0x1E"
+            }
+          },
+          {
+            "rlProfileCfg_t": {
+              "profileId": 2,
+              "pfVcoSelect": "0x0",
+              "pfCalLutUpdate": "0x0",
+              "startFreqConst_GHz": 77.0,
+              "idleTimeConst_usec": 7.0,
+              "adcStartTimeConst_usec": 3.869999885559082,
+              "rampEndTime_usec": 129.46000671386719,
+              "txOutPowerBackoffCode": "0x0",
+              "txPhaseShifter": "0x0",
+              "freqSlopeConst_MHz_usec": 29.982000350952148,
+              "txStartTime_usec": 0.0,
+              "numAdcSamples": 1024,
+              "digOutSampleRate": 8500,
+              "hpfCornerFreq1": 0,
+              "hpfCornerFreq2": 0,
+              "rxGain_dB": "0x1E"
+            }
+          },
+          {
+            "rlProfileCfg_t": {
+              "profileId": 3,
+              "pfVcoSelect": "0x0",
+              "pfCalLutUpdate": "0x0",
+              "startFreqConst_GHz": 77.0,
+              "idleTimeConst_usec": 7.0,
+              "adcStartTimeConst_usec": 5.2399997711181641,
+              "rampEndTime_usec": 55.5,
+              "txOutPowerBackoffCode": "0x0",
+              "txPhaseShifter": "0x0",
+              "freqSlopeConst_MHz_usec": 70.005996704101562,
+              "txStartTime_usec": 0.0,
+              "numAdcSamples": 512,
+              "digOutSampleRate": 11000,
+              "hpfCornerFreq1": 0,
+              "hpfCornerFreq2": 0,
+              "rxGain_dB": "0x1E"
+            }
+          }
+        ],
+        "rlChirps": [
+          {
+            "rlChirpCfg_t": {
+              "chirpStartIdx": 0,
+              "chirpEndIdx": 511,
+              "profileId": 3,
+              "startFreqVar_MHz": 0.0,
+              "freqSlopeVar_KHz_usec": 0.0,
+              "idleTimeVar_usec": 0.0,
+              "adcStartTimeVar_usec": 0.0,
+              "txEnable": "0x3"
+            }
+          }
+        ],
+        "rlFrameCfg_t": {
+          "chirpEndIdx": 192,
+          "chirpStartIdx": 0,
+          "numLoops": 111,
+          "numFrames": 5,
+          "framePeriodicity_msec": 1340.0,
+          "triggerSelect": 1,
+          "numDummyChirpsAtEnd": 0,
+          "frameTriggerDelay": 0.0
+        },
+        "rlBpmChirps": [],
+        "rlRfPhaseShiftCfgs": [],
+        "rlRfProgFiltConfs": [],
+        "rlLoopbackBursts": [],
+        "rlDynChirpCfgs": [],
+        "rlDynPerChirpPhShftCfgs": []
+      },
+      "rawDataCaptureConfig": {
+        "rlDevDataFmtCfg_t": {
+          "iqSwapSel": 0,
+          "chInterleave": 0
+        },
+        "rlDevDataPathCfg_t": {
+          "intfSel": 1,
+          "transferFmtPkt0": "0x1",
+          "transferFmtPkt1": "0x0",
+          "cqConfig": 2,
+          "cq0TransSize": 132,
+          "cq1TransSize": 132,
+          "cq2TransSize": 72
+        },
+        "rlDevLaneEnable_t": {
+          "laneEn": "0xF"
+        },
+        "rlDevDataPathClkCfg_t": {
+          "laneClkCfg": 1,
+          "dataRate_Mbps": 600
+        },
+        "rlDevLvdsLaneCfg_t": {
+          "laneFmtMap": 0,
+          "laneParamCfg": "0x1"
+        }
+      },
+      "monitoringConfig": {
+      }
+    }
+  ],
+  "processingChainConfig": {
+    "detectionChain": {
+      "name": "TI_GenericChain",
+      "detectionLoss": 1,
+      "systemLoss": 1,
+      "implementationMargin": 2,
+      "detectionSNR": 12,
+      "theoreticalRxAntennaGain": 9,
+      "theoreticalTxAntennaGain": 9
+    }
+  }
+}
